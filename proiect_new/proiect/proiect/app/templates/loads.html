@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestiune Încărcături</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{{ url_for('index') }}">ALEXFREIGHTDISPATCH</a>
+            </div>
+           
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{{ url_for('loads') }}">Gestiune Încărcături</a></li>
+                <li><a href="{{ url_for('drivers') }}">Gestiune Șoferi</a></li>
+                <li><a href="{{ url_for('login') }}">Autentificare</a></li>
+                <li><a href="{{ url_for('register') }}">Înregistrare</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="text-center">Gestiune Încărcături</h2>
+        <form action="{{ url_for('add_load') }}" method="post">
+            <div class="form-group">
+                <label for="load_id">ID Încărcătură</label>
+                <input type="text" class="form-control" name="load_id" id="load_id" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Descriere</label>
+                <input type="text" class="form-control" name="description" id="description" required>
+            </div>
+            <div class="form-group">
+                <label for="status">Stare</label>
+                <input type="text" class="form-control" name="status" id="status" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Adaugă Încărcătură</button>
+        </form>
+
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>ID <a href="?sort=id">↑↓</a></th>
+                    <th>Descriere</th>
+                    <th>Stare</th>
+                    <th>Acțiuni</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Conținut generat de backend -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrap.com/4.5.2/js/bootstrap.min.js"></script>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <span class="text-center">&copy; 2024 ALEXFREIGHTDISPATCH</span>
+            </div>
+        </footer>
+    
+</body>
+</html>

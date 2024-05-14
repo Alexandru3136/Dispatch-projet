@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Șofer</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    .container {
+      margin-top: 50px;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .card {
+      margin-bottom: 20px;
+    }
+    .track-icon {
+      font-size: 40px;
+      color: #17a2b8;
+    }
+    .track-name {
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    #map {
+      width: 100%;
+      height: 400px;
+      margin-top: 20px;
+    }
+    .legend {
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .legend-item {
+      margin-bottom: 5px;
+    }
+    .legend-color {
+      display: inline-block;
+      width: 20px;
+      height: 10px;
+      margin-right: 5px;
+      border-radius: 2px;
+    }
+    .user-info {
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <h2>Dashboard Șofer</h2>
+      </div>
+      <div class="col-md-4">
+        <div class="user-info float-right">
+          <p><b>Nume:</b> Doe</p>
+          <p><b>Prenume:</b> John</p>
+          <p><b>Tip utilizator:</b> Șofer</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-truck"></i> Hartă traseu
+      </div>
+      <div class="card-body">
+        <div id="map"></div>
+        <div class="legend">
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #007bff;"></span> Traseul 1
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #28a745;"></span> Traseul 2
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #ffc107;"></span> Traseul 3
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-truck"></i> Încărcături
+      </div>
+      <div class="card-body">
+        <ul class="list-group">
+          <!-- Lista de încărcături -->
+          <li class="list-group-item">
+            <i class="fas fa-truck track-icon"></i> 
+            <span class="track-name">Track 1</span>
+            <button class="btn btn-info btn-sm float-right" data-toggle="modal" data-target="#cargoDetailsModal1"><i class="fas fa-info-circle"></i> Vezi detalii</button>
+          </li>
+          <li class="list-group-item">
+            <i class="fas fa-truck track-icon"></i> 
+            <span class="track-name">Track 2</span>
+            <button class="btn btn-info btn-sm float-right" data-toggle="modal" data-target="#cargoDetailsModal2"><i class="fas fa-info-circle"></i> Vezi detalii</button>
+          </li>
+          <li class="list-group-item">
+            <i class="fas fa-truck track-icon"></i> 
+            <span class="track-name">Track 3</span>
+            <button class="btn btn-info btn-sm float-right" data-toggle="modal" data-target="#cargoDetailsModal3"><i class="fas fa-info-circle"></i> Vezi detalii</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="cargoDetailsModal1" tabindex="-1" role="dialog" aria-labelledby="cargoDetailsModalLabel1" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cargoDetailsModalLabel1"><i class="fas fa-info-circle"></i> Detalii încărcătură</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group">
+              <li class="list-group-item"><b>Numele Companiei:</b> ABC Company</li>
+              <li class="list-group-item"><b>Adresa de ridicare:</b> New York, NY</li>
+              <li class="list-group-item"><b>Adresa de livrare:</b> Los Angeles, CA</li>
+              <li class="list-group-item"><b>Numărul de palete:</b> 5</li>
+              <li class="list-group-item"><b>Dimensiunea paletelor (înălțime, lățime, lungime):</b> 2x3x4</li>
+              <li class="list-group-item"><b>Aranjarea în camion:</b> Într-un rând</li>
+              <li class="list-group-item"><b>Tipul de marfă:</b> Electronice</li>
+              <li class="list-group-item"><b>Numărul Contractului:</b> XYZ1231</li>
+              <li class="list-group-item"><b>Prețul livrării:</b> $1000</li>
+              <li class="list-group-item"><b>Tipul Comionului:</b> Frigorific</li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Închide</button>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="cargoDetailsModal2" tabindex="-1" role="dialog" aria-labelledby="cargoDetailsModalLabel2" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cargoDetailsModalLabel2"><i class="fas fa-info-circle"></i> Detalii încărcătură</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group">
+              <li class="list-group-item"><b>Numele Companiei Client:</b> XYZ Company</li>
+              <li class="list-group-item"><b>Adresa de ridicare:</b> Chicago, IL</li>
+              <li class="list-group-item"><b>Adresa de livrare:</b> Houston, TX</li>
+              <li class="list-group-item"><b>Dimensiunea paletelor (înălțime, lățime, lungime):</b> 3x4x5</li>
+              <li class="list-group-item"><b>Aranjarea în camion:</b> În două rânduri</li>
+              <li class="list-group-item"><b>Tipul de marfă:</b> Mobila</li>
+              <li class="list-group-item"><b>Numărul Contractului:</b> PRS0123</li>
+              <li class="list-group-item"><b>Prețul livrării:</b> $1500</li>
+              <li class="list-group-item"><b>Tipul camionului:</b> Uscat</li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Închide</button>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="cargoDetailsModal3" tabindex="-1" role="dialog" aria-labelledby="cargoDetailsModalLabel3" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cargoDetailsModalLabel3"><i class="fas fa-info-circle"></i> Detalii încărcătură</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group">
+              <li class="list-group-item"><b>Numele Companiei Client:</b> QRS Company</li>
+              <li class="list-group-item"><b>Adresa de ridicare:</b> Miami, FL</li>
+              <li class="list-group-item"><b>Adresa de livrare:</b> Atlanta, GA</li>
+              <li class="list-group-item"><b>Numărul de palete:</b> 10</li>
+              <li class="list-group-item"><b>Dimensiunea paletelor (înălțime, lățime, lungime):</b> 2x2x6</li>
+              <li class="list-group-item"><b>Aranjarea în camion:</b> Într-un rând</li>
+              <li class="list-group-item"><b>Tipul de marfă:</b> Alimente</li>
+              <li class="list-group-item"><b>Numărul Contractului:</b> QVU4657</li>
+              <li class="list-group-item"><b>Prețul livrării:</b> $2000</li>
+              <li class="list-group-item"><b>Tipul camionului:</b> Cisternă</li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Închide</button>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([40.7128, -74.0060], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var track1 = [
+      [40.7128, -74.0060],
+      [34.0522, -118.2437]
+    ];
+
+    var track2 = [
+      [41.8781, -87.6298],
+      [29.7604, -95.3698]
+    ];
+
+    var track3 = [
+      [25.7617, -80.1918],
+      [33.7490, -84.3880]
+    ];
+
+    var track1Polyline = L.polyline(track1, {color: '#007bff'}).addTo(map);
+    var track2Polyline = L.polyline(track2, {color: '#28a745'}).addTo(map);
+    var track3Polyline = L.polyline(track3, {color: '#ffc107'}).addTo(map);
+
+    var marker1 = L.marker([40.7128, -74.0060]).addTo(map);
+    var marker2 = L.marker([34.0522, -118.2437]).addTo(map);
+    var marker3 = L.marker([41.8781, -87.6298]).addTo(map);
+    var marker4 = L.marker([29.7604, -95.3698]).addTo(map);
+    var marker5 = L.marker([25.7617, -80.1918]).addTo(map);
+    var marker6 = L.marker([33.7490, -84.3880]).addTo(map);
+
+    marker1.bindPopup("<b>Punct de preluare</b><br>New York, NY").openPopup();
+    marker2.bindPopup("<b>Punct de livrare</b><br>Los Angeles, CA").openPopup();
+    marker3.bindPopup("<b>Punct de preluare</b><br>Chicago, IL").openPopup();
+    marker4.bindPopup("<b>Punct de livrare</b><br>Houston, TX").openPopup();
+    marker5.bindPopup("<b>Punct de preluare</b><br>Miami, FL").openPopup();
+    marker6.bindPopup("<b>Punct de livrare</b><br>Atlanta, GA").openPopup();
+  </script>
+</body>
+</html>

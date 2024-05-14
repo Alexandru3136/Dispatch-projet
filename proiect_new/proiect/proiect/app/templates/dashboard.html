@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Administrator</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<header class="header-general js-header-general h-20" style="transform: translate3d(0px, 0px, 0px); margin-bottom: -5%;">
+  <a href="/dashboard" title="Home" aria-label="Home" >
+      <img src="{{ url_for('static', filename='images/frightdispatch-black.svg') }}" alt="">
+  </a>
+</header>  
+<body>
+  
+  {% macro render_track_modal(key) -%}
+    <div class="modal fade" id="editTrackModal{{key.id}}" tabindex="-1" role="dialog" aria-labelledby="editTrackModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document" aria-readonly="true">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editTrackModalLabel">Contract {{key.contract_number}}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            {% if session['role'] != 'driver'%}
+            <form action="{{ '/load/' + key.id|string + '/update' }}" method="post" autocomplete="off">
+              <div class="form-group">
+                <label for="contract_number"><i class="fas fa-building"></i> Nr. Contract</label>
+                <input type="text" readonly class="form-control" name="contract_number" id="contract_number" value="{{key.contract_number}}">
+              </div>
+              <div class="form-group">
+                <label for="company_name"><i class="fas fa-building"></i> Numele Companiei</label>
+                <input type="text" class="form-control" name="company_name" id="company_name" required value="{{key.company_name}}">
+              </div>
+              <div class="form-group">
+                <label for="pickup_address"><i class="fas fa-map-marker-alt"></i> Adresa de ridicare</label>
+                <input type="text" class="form-control" name="pickup_address" id="pickup_address" required value={{key.pickup_address}}>
+              </div>
+              <div class="form-group">
+                <label for="delivery_address"><i class="fas fa-map-marker-alt"></i> Adresa de livrare</label>
+                <input type="text" class="form-control" name="delivery_address" id="delivery_address" required value="{{key.delivery_address}}">
+              </div>
+              <div class="form-group">
+                <label for="pallet_count"><i class="fas fa-box"></i> Numărul de palete</label>
+                <input type="number" class="form-control" name="pallet_count" id="pallet_count" required value="{{key.pallet_count}}">
+              </div>
+              <div class="form-group">
+                <label for="pallet_dimensions"><i class="fas fa-ruler-combined"></i> Dimensiunea paletelor (înălțime, lățime, lungime)</label>
+                <input type="text" class="form-control" name="pallet_dimensions" id="pallet_dimensions" required value="{{key.pallet_dimensions}}">
+              </div>
+              <div class="form-group">
+                <label for="truck_arrangement"><i class="fas fa-truck-loading"></i> Aranjarea în truck</label>
+                <input type="text" class="form-control" name="truck_arrangement" id="truck_arrangement" required value="{{key.truck_arrangement}}">
+              </div>
+              <div class="form-group">
+                <label for="cargo_type"><i class="fas fa-cube"></i> Tipul de marfă</label>
+                <input type="text" class="form-control" name="cargo_type" id="cargo_type" required value="{{key.cargo_type}}">
+              </div>
+              <div class="form-group">
+                <label for="delivery_price"><i class="fas fa-dollar-sign"></i> Prețul încărcăturii</label>
+                <input type="text" class="form-control" name="delivery_price" id="delivery_price" required value="{{key.delivery_price}}">
+              </div>
+              <div class="form-group">
+                <label for="truck_type"><i class="fas fa-truck-moving"></i> Tipul track-ului</label>
+                {% if key.truck_type == 'Remorcă Frigorific'%}
+                <select class="form-control" name="truck_type" id="truck_type" required>
+                  <option value="" disabled hidden>Selectati tip camion</option>
+                  <option selected>Remorcă Frigorifică</option>
+                  <option>Remorcă Uscată</option>
+                  <option>Remorcă Cisternă</option>
+                </select>
+                {% elif key.truck_type == 'Remorcă Uscată' %}
+                <select class="form-control" name="truck_type" id="truck_type" required>
+                  <option>Remorcă Frigorifică</option>
+                  <option selected>Remorcă Uscată</option>
+                  <option>Remorcă Cisternă</option>
+                </select>
+                {% elif key.truck_type == 'Remorcă Cisternă' %}
+                <select class="form-control" name="truck_type" id="truck_type" required>
+                  <option>Remorcă Frigorifică</option>
+                  <option>Remorcă Uscată</option>
+                  <option selected>Remorcă Cisternă</option>
+                </select>
+                {% else %}
+                <select class="form-control" name="truck_type" id="truck_type" required>
+                  <option value="" selected hidden>Selectati tip camion</option>
+                  <option>Remorcă Frigorifică</option>
+                  <option>Remorcă Uscată</option>
+                  <option>Remorcă Cisternă</option>    
+                </select>             
+                {% endif %}
+              </div>
+              <div class="form-group">
+                <label for="driver_id"><i class="fas fa-user"></i>Sofer</label>
+                <select class="form-control" name="driver_id" id="driver_id" required>
+                  <option value="" selected hidden>Selectati sofer</option>
+                
+                {% for driver in drivers%}
+                  {% if key.driver_id == driver.id%}
+                  <option value="{{driver.id}}" selected>{{driver.desc()}}</option>   
+                  {% else %}
+                  <option value="{{driver.id}}">{{driver.desc()}}</option>   
+                  {% endif %}
+                {% endfor %}
+                </select>
+              </div>  
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salveaza Modificarile</button>            
+            </form>
+            {% else %}
+            <form action="{{ '/load/' + key.id|string + '/update' }}" method="post">
+              <div class="form-group">
+                <label for="status"><i class="fas fa-building"></i> Nr. Contract</label>
+                <input type="text" readonly class="form-control" name="contract_number" id="contract_number" value="{{key.contract_number}}">
+              </div>
+              <div class="form-group">
+                <label for="company_name"><i class="fas fa-building"></i> Numele Companiei</label>
+                <input type="text" readonly class="form-control" name="company_name" id="company_name" required value="{{key.company_name}}">
+              </div>
+              <div class="form-group">
+                <label for="pickup_address"><i class="fas fa-map-marker-alt"></i> Adresa de unde ia</label>
+                <input type="text" readonly class="form-control" name="pickup_address" id="pickup_address" required value={{key.pickup_address}}>
+              </div>
+              <div class="form-group">
+                <label for="delivery_address"><i class="fas fa-map-marker-alt"></i> Adresa unde trebuie să-l ducă</label>
+                <input type="text" readonly class="form-control" name="delivery_address" id="delivery_address" required value="{{key.delivery_address}}">
+              </div>
+              <div class="form-group">
+                <label for="pallet_count"><i class="fas fa-box"></i> Numărul de palete</label>
+                <input type="number" readonly class="form-control" name="pallet_count" id="pallet_count" required value="{{key.pallet_count}}">
+              </div>
+              <div class="form-group">
+                <label for="pallet_dimensions"><i class="fas fa-ruler-combined"></i> Dimensiunea paletelor (înălțime, lățime, lungime)</label>
+                <input type="text" readonly class="form-control" name="pallet_dimensions" id="pallet_dimensions" required value="{{key.pallet_dimensions}}">
+              </div>
+              <div class="form-group">
+                <label for="truck_arrangement"><i class="fas fa-truck-loading"></i> Aranjarea în truck</label>
+                <input type="text" readonly class="form-control" name="truck_arrangement" id="truck_arrangement" required value="{{key.truck_arrangement}}">
+              </div>
+              <div class="form-group">
+                <label for="cargo_type"><i class="fas fa-cube"></i> Tipul de marfă</label>
+                <input type="text" readonly class="form-control" name="cargo_type" id="cargo_type" required value="{{key.cargo_type}}">
+              </div>
+              <div class="form-group">
+                <label for="delivery_price"><i class="fas fa-dollar-sign"></i> Prețul încărcăturii</label>
+                <input type="text" readonly class="form-control" name="delivery_price" id="delivery_price" required value="{{key.delivery_price}}">
+              </div>
+              <div class="form-group">
+                <label for="status"><i class="fas fa-calendar-check"></i> Statut</label>
+                {% if key.status == 'pending'%}
+                <select class="form-control" name="status" id="status" required>
+                  <option value="pending" selected>In asteptare</option>
+                  <option value="alocat">Alocat</option>
+                  <option value="onway">In livrare</option>
+                  <option value="delivered">Livrat</option>
+                </select>
+                {% elif key.status == 'assigned' %}
+                <select class="form-control" name="status" id="status" required>
+                  <option value="pending">In asteptare</option>
+                  <option value="alocat" selected>Alocat</option>
+                  <option value="onway">In livrare</option>
+                  <option value="delivered">Livrat</option>
+                </select>
+                {% elif key.status == 'onway' %}
+                <select class="form-control" name="status" id="status" required>
+                  <option value="pending">In asteptare</option>
+                  <option value="alocat">Alocat</option>
+                  <option value="onway" selected>In livrare</option>
+                  <option value="delivered">Livrat</option>
+                </select>
+                {% elif key.status == 'delivered' %}
+                <select class="form-control" name="status" id="status" required>
+                  <option value="pending">In asteptare</option>
+                  <option value="alocat">Alocat</option>
+                  <option value="onway">In livrare</option>
+                  <option value="delivered" selected>Livrat</option>
+                </select>                
+                {% else %}
+                <select class="form-control" name="status" id="status" required>
+                  <option value="" selected hidden>Selectati tip camion</option>
+                  <option value="pending">În așteptare</option>
+                  <option value="alocat">Alocat</option>
+                  <option value="onway">In livrare</option>
+                  <option value="delivered">Livrat</option>  
+                </select>             
+                {% endif %}
+              </div>
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salveaza Modificarile</button>            
+            </form>            
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+    </div>  
+
+    <div class="modal fade" id="removeTrackModal{{key.id}}" tabindex="-1" role="dialog" aria-labelledby="removeTrackModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="removeTrackModalLabel">Șterge Contract {{key.contract_number}}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="delete{{key.id}}">Sigur doriți să ștergeți înregistrarea?</label>
+            </div>
+            <div class="row">
+              <form action="{{ '/load/' + key.id|string + '/delete' }}" method="post">
+                <button type="submit" class="btn btn-danger">Șterge</button>
+              </form>
+              <button type="cancel" class="btn btn-primary"  data-dismiss="modal" aria-label="Close">Anulează</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>      
+  {%- endmacro%}
+
+  {% macro render_user_modal(key) -%}
+    <div class="modal fade" id="editUserModal{{key.id}}" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document" aria-readonly="true">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editUserModalLabel">Contract {{key.contract_number}}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <form action="{{ '/user/' + key.id|string + '/edit' }}" method="post" autocomplete="off">
+              <div class="form-group">
+                <label for="email">Adresa de email</label>
+                <input type="email" class="form-control" name="email" id="email" readonly autocomplete="new-password" value="{{key.email}}">
+            </div>
+
+              <div class="form-group">
+                <label for="firstname">Nume</label>
+                <input type="text" class="form-control" name="firstname" id="firstname" required value="{{key.firstname}}">
+              </div>
+              <div class="form-group">
+                  <label for="lastname">Prenume</label>
+                  <input type="text" class="form-control" name="lastname" id="lastname" required value="{{key.lastname}}">
+              </div>
+
+              <div class="form-group">
+                  <label for="password">Parolă Nouă</label>
+                  <input type="password" class="form-control" name="password" id="password" autocomplete="new-password">
+              </div>
+              <div class="form-group">
+                  <label for="edit_user_role">Rol</label>
+                  {% if key.role == 'admin'%}
+                  <select class="form-control" name="role" id="edit_user_role" required onchange="showEditUserCargoType()">
+                      <option value="" disabled hidden>Selectati rolul</option>
+                      <option value="admin" selected>Administrator</option>
+                      <option value="dispatcher">Operator</option>
+                      <option value="driver">Șofer</option>                               
+                  </select>
+                  {% elif key.role == 'dispatcher' %}
+                  <select class="form-control" name="role" id="edit_user_role" required onchange="showEditUserCargoType()">
+                      <option value="" disabled hidden>Selectati rolul</option>
+                      <option value="admin">Administrator</option>
+                      <option value="dispatcher" selected>Operator</option>
+                      <option value="driver">Șofer</option>                               
+                  </select>
+                  {% elif key.role == 'driver' %}
+                  <select class="form-control" name="role" id="edit_user_role" required onchange="showEditUserCargoType()">
+                      <option value="" selected disabled hidden>Selectati rolul</option>
+                      <option value="admin">Administrator</option>
+                      <option value="dispatcher">Operator</option>
+                      <option value="driver" selected>Șofer</option>                               
+                  </select>
+                  {% else %}
+                  <select class="form-control" name="role" id="edit_user_role" required onchange="showEditUserCargoType()">
+                      <option value="" selected disabled hidden>Selectati rolul</option>
+                      <option value="admin">Administrator</option>
+                      <option value="dispatcher">Operator</option>
+                      <option value="driver">Șofer</option>                               
+                  </select>             
+                  {% endif %}                                            
+              </div>
+              {% if key.role == 'driver' %}
+              <div class="form-group" id="cargo_type" style="display:block;">
+              {% else %}
+              <div class="form-group" id="cargo_type" style="display:none;">
+              {% endif %}
+                  <label for="edit_user_cargo_type">Tip Camion</label>
+                    {% if key.cargo_type == 'Remorcă Frigorifică' %}
+                    <select class="form-control" name="cargo_type" id="edit_user_cargo_type" required>
+                      <option value="" disabled hidden>Selectati tip camion</option>
+                      <option selected>Remorcă Frigorifică</option>
+                      <option>Remorcă Uscată</option>
+                      <option>Remorcă Cisternă</option>
+                    </select>
+                    {% elif key.cargo_type == 'Remorcă Uscată' %}
+                    <select class="form-control" name="cargo_type" id="edit_user_cargo_type" required>
+                      <option>Remorcă Frigorifică</option>
+                      <option selected>Remorcă Uscată</option>
+                      <option>Remorcă Cisternă</option>
+                    </select>
+                    {% elif key.cargo_type == 'Remorcă Cisternă' %}
+                    <select class="form-control" name="cargo_type" id="edit_user_cargo_type" required>
+                      <option>Remorcă Frigorifică</option>
+                      <option>Remorcă Uscată</option>
+                      <option selected>Remorcă Cisternă</option>
+                    </select>
+                    {% else %}
+                    <select class="form-control" name="cargo_type" id="edit_user_cargo_type" required>
+                      <option value="" selected hidden>Selectați tip camion</option>
+                      <option>Remorcă Frigorifică</option>
+                      <option>Remorcă Uscată</option>
+                      <option>Remorcă Cisternă</option>    
+                    </select>             
+                    {% endif %}  
+                  </select>             
+              </div>
+              <div class="form-group" id="license_plate_field" style="display:none;">
+                  <label for="license_plate">Nr Înmatriculare</label>
+                  <input type="text" class="form-control" name="license_plate" id="license_plate" value="{{key.license_plate}}">
+              </div>
+   
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salveaza Modificarile</button>            
+            </form>
+
+
+          </div>
+        </div>
+      </div>
+    </div>  
+
+    <div class="modal fade" id="removeUserModal{{key.id}}" tabindex="-1" role="dialog" aria-labelledby="removeUserModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="removeUserModalLabel">Radiaza Utilizator {{key.email}}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="delete{{key.id}}">Sigur doriti sa radiati inregistrarea?</label>
+            </div>
+            <div class="row">
+              <form action="{{ '/user/' + key.id|string + '/delete' }}" method="post">
+                <button type="submit" class="btn btn-danger">Radiaza</button>
+              </form>
+              <button type="cancel" class="btn btn-primary"  data-dismiss="modal" aria-label="Close">Anuleaza</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>       
+  {%- endmacro%}
+  <div style="padding: 3%">
+    
+    <div style="display: flex; justify-content: flex-end; margin-right: 10px; margin-top: 2%;">
+      <div class="row">
+      <h4 class="m-1">{{firstname + ' ' + lastname}}</h4>
+      <a href="{{ url_for('profile') }}" class="text-white fw-bold">
+          <button type="button" class="btn btn-primary m-1"><i class="fas fa-user"></i></button>
+      </a>
+      <a href="{{ url_for('logout') }}" class="text-white fw-bold">
+        <button type="button" class="btn btn-danger m-1" ><i class="fas fa-power-off"></i></button>
+      </a>      
+    </div>
+    </div>    
+    <div style="display: flex; justify-content: flex-start; margin-right: 10px;">
+      <h2>Dashboard</h2>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <h2 style="display: flex; justify-content: flex-start; margin-bottom: 5px;">Încărcături</h2>
+      </div>
+      <div class="col-md-6" style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
+        {% if session['role'] != 'driver'%}
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTrackModal">
+          <i class="fas fa-plus"></i> Adaugă Încărcătură
+        </button>
+        {% endif%}
+      </div>   
+
+      
+    </div>
+
+   
+    <div class="tableWrap" style="overflow-x:auto; margin-bottom: 50px;">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Statut</th>
+            <th>Nr. Contract</th>
+            <th>Întreprindere</th>
+            <th>Adresa Ridicare</th> 
+            <th>Adresa Livrare</th> 
+            <th>Tip Camion</th> 
+            {% if session['role'] != 'driver'%}
+            <th>Șofer</th>
+            <th></th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody >
+          {% if loads %}
+            {% for load in loads %}
+
+              <tr>
+                  <td>
+                    <button type="button" class="btn btn-sm" data-toggle="modal" data-target="#editTrackModal{{ load.id }}">
+                      <i class="fas fa-pencil-alt"></i> 
+                    </button>
+                    {{ render_track_modal(load) }}
+                  </td>
+                  <td>{{ load.status_desc() }}</td> 
+                  <td>{{ load.contract_number }}</td>
+                  <td>{{ load.company_name }}</td> 
+                  <td>{{ load.pickup_address }}</td>
+                  <td>{{ load.delivery_address }}</td>
+                  <td>{{ load.truck_type }}</td>
+                  {% if session['role'] != 'driver'%}
+                  <td>{{ load.driver_name() }}</td>  
+                  <td style="width: 70px">
+                    <div class="row" style="margin: 1px;">                   
+                      <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#removeTrackModal{{ load.id }}">
+                        <i class="fas fa-trash"></i> 
+                      </button>
+                    </div>
+                  </td>
+                  {% endif %}
+              </tr>
+            {% endfor %}
+          {% endif %}    
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <h2 style="display: flex; justify-content: flex-start; margin-bottom: 5px;">Recenzii</h2>
+      </div>
+      <div class="col-md-6" style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addCommentModal">
+          <i class="fas fa-plus"></i> Adaugă Recenzie
+        </button>
+      </div>   
+    </div>
+
+    <div class="tableWrap" style="overflow-x:auto; margin-bottom: 50px; height: 300px;">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-md-2">Nr. Contract</th>
+            <th class="col-md-2">Utilizator</th>
+            <th class="col-md-8">Comentariu</th> 
+          </tr>
+        </thead>
+        <tbody >
+          {% if comments %}
+            {% for comment in comments %}
+
+              <tr>
+                  <td>{{ comment.contract_number }}</td> 
+                  <td>{{ comment.user_name() }}</td>  
+                  <td>{{ comment.comment }}</td> 
+              </tr>
+            {% endfor %}
+          {% endif %}    
+        </tbody>
+      </table>
+    </div>
+
+    {% if session['role'] == 'admin' %}
+    <div class="row">
+      <div class="col-md-6">
+        <h2 style="display: flex; justify-content: flex-start; margin-bottom: 5px;">Utilizatori</h2>
+      </div>
+      <div class="col-md-6" style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addUserModal">
+          <i class="fas fa-plus"></i> Adaugă Utilizator
+        </button>
+      </div>   
+    </div>
+    <div class="tableWrap" style="overflow-x:auto; margin-bottom: 50px; height: 300px;">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Email</th>
+            <th>Nume</th> 
+            <th>Prenume</th> 
+            <th>Rol</th> 
+            <th>Tip Camion</th> 
+            <th>Nr Înmatriculare</th> 
+            <th></th>
+          </tr>
+        </thead>
+        <tbody >
+          {% if users %}
+            {% for user in users %}
+
+              <tr>
+                  <td>
+                    <button type="button" class="btn btn-sm" data-toggle="modal" data-target="#editUserModal{{ user.id }}">
+                      <i class="fas fa-pencil-alt"></i> 
+                    </button>
+                    {{ render_user_modal(user) }}
+                  </td>
+                  <td>{{ user.id }}</td> 
+                  <td>{{ user.email }}</td>  
+                  <td>{{ user.firstname }}</td> 
+                  <td>{{ user.lastname }}</td> 
+                  <td>{{ user.role }}</td> 
+                  <td>{{ user.cargo_type }}</td> 
+                  <td>{{ user.license_plate }}</td> 
+                  <td style="width: 70px">
+                    <div class="row" style="margin: 1px;">                   
+                      <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#removeUserModal{{ user.id }}">
+                        <i class="fas fa-trash"></i> 
+                      </button>
+                    </div>
+                  </td>
+              </tr>
+            {% endfor %}
+          {% endif %}    
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+
+
+    
+
+  <!-- Modal -->
+  <div class="modal fade" id="addTrackModal" tabindex="-1" role="dialog" aria-labelledby="addTrackModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addTrackModalLabel"><i class="fas fa-plus-circle"></i> Adăugare Încărcătură</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{{ '/load/add' }}" method="post" autocomplete="off">
+            <div class="form-group">
+              <label for="contract_number"><i class="fas fa-building"></i> Nr. Contract</label>
+              <input type="text" class="form-control" name="contract_number" id="contract_number" placeholder="Introduceți numarul contractului" required>
+            </div>        
+            <div class="form-group">
+              <label for="company_name"><i class="fas fa-building"></i> Numele Companiei</label>
+              <input type="text" class="form-control" name="company_name" id="company_name" placeholder="Introduceți numele companiei" required>
+            </div>
+            <div class="form-group">
+              <label for="pickup_address"><i class="fas fa-map-marker-alt"></i> Adresa de ridicare</label>
+              <input type="text" class="form-control" name="pickup_address" id="pickup_address" placeholder="Introduceți adresa de unde ia" required>
+            </div>
+            <div class="form-group">
+              <label for="delivery_address"><i class="fas fa-map-marker-alt"></i> Adresa de livrare</label>
+              <input type="text" class="form-control" name="delivery_address" id="delivery_address" placeholder="Introduceți adresa de livrare" required>
+            </div>
+            <div class="form-group">
+              <label for="pallet_count"><i class="fas fa-box"></i> Numărul de palete</label>
+              <input type="number" class="form-control" name="pallet_count" id="pallet_count" placeholder="Introduceți numărul de palete" required>
+            </div>
+            <div class="form-group">
+              <label for="pallet_dimensions"><i class="fas fa-ruler-combined"></i> Dimensiunea paletelor (înălțime, lățime, lungime)</label>
+              <input type="text" class="form-control" name="pallet_dimensions" id="pallet_dimensions" placeholder="Introduceți dimensiunea paletelor" required>
+            </div>
+            <div class="form-group">
+              <label for="truck_arrangement"><i class="fas fa-truck-loading"></i> Aranjarea în truck</label>
+              <select class="form-control" name="truck_arrangement" id="truck_arrangement" required>
+                <option>Într-un rând</option>
+                <option>În două rânduri</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cargo_type"><i class="fas fa-cube"></i> Tipul de marfă</label>
+              <input type="text" class="form-control" name="cargo_type" id="cargo_type" placeholder="Introduceți tipul de marfă" required>
+            </div>
+            <div class="form-group">
+              <label for="delivery_price"><i class="fas fa-dollar-sign"></i> Prețul încărcăturii</label>
+              <input type="text" class="form-control" name="delivery_price" id="delivery_price" placeholder="Introduceți prețul încărcăturii" required>
+            </div>
+            <div class="form-group">
+              <label for="truck_type"><i class="fas fa-truck-moving"></i> Tipul track-ului</label>
+              <select class="form-control" name="truck_type" id="truck_type" required>
+                <option>Remorcă Frigorifică</option>
+                <option>Remorcă Uscată</option>
+                <option>Remorcă Cisternă</option>    
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Adăugare</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="addCommentModal" tabindex="-1" role="dialog" aria-labelledby="addCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCommentModalLabel"><i class="fas fa-plus-circle"></i> Adăugare Comentariu</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{{ '/comment/add' }}" method="post" autocomplete="off">
+            <div class="form-group">
+              <label for="contract_number"><i class="fas fa-building"></i> Nr. Contract</label>
+              <input type="text" class="form-control" name="contract_number" id="contract_number" placeholder="Introduceți numarul contractului" required>
+            </div>        
+
+
+            
+            <div class="form-group" style="height: 140px;">
+              <label for="comment"><i class="fas fa-comment"></i> Comentariu</label>
+              <textarea style="height: 120px; max-height: 120px; resize: none;" class="form-control" name="comment" id="comment" placeholder="Introduceți comentariu" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Adăugare</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addUserModalLabel"><i class="fas fa-plus-circle"></i> Adăugare Comentariu</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{{ '/user/add' }}" method="post" autocomplete="off">
+            <div class="form-group">
+              <label for="firstname">Nume</label>
+              <input type="text" class="form-control" name="firstname" id="firstname" required>
+            </div>
+            <div class="form-group">
+                <label for="lastname">Prenume</label>
+                <input type="text" class="form-control" name="lastname" id="lastname" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Adresa de email</label>
+                <input type="email" class="form-control" name="email" id="email" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label for="password">Parolă</label>
+                <input type="password" class="form-control" name="password" id="password" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label for="role">Rol</label>
+                <select class="form-control" name="role" id="add_user_role" required onchange="showAddUserCargoType()">
+                    <option value="" selected disabled hidden>Selectati rolul</option>
+                    <option value="admin">Administrator</option>
+                    <option value="dispatcher">Operator</option>
+                    <option value="driver">Șofer</option>                               
+                </select>                                          
+            </div>
+            <!-- Inregistrarea daca e sofer -->
+            <div class="form-group" id="add_user_cargo_type" style="display:none;">
+                <label for="cargo_type">Tip Camion</label>
+                <select class="form-control" name="cargo_type" id="add_user_cargo_type">
+                  <option value="" selected hidden>Selectati tip camion</option>
+                  <option>Remorcă Frigorifică</option>
+                  <option>Remorcă Uscată</option>
+                  <option>Remorcă Cisternă</option>    
+                </select>             
+            </div>
+            <div class="form-group" id="add_user_license_plate_field" style="display:none;">
+                <label for="license_plate">Nr Înmatriculare</label>
+                <input type="text" class="form-control" name="license_plate" id="add_user_license_plate">
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Adăugare</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer h-5">
+    <div class="container">
+        <span class="text-center">&copy; 2024 ALEXFREIGHTDISPATCH</span>
+    </div>
+  </footer>    
+  
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    function showAddUserCargoType() {
+      var role = document.getElementById("add_user_role").value;
+      var cargo_type = document.getElementById("add_user_cargo_type");
+      var licensePlateField = document.getElementById("add_user_license_plate_field");
+      var licensePlateInput = document.getElementById("add_user_license_plate");
+
+      if (role == "driver") {
+          cargo_type.style.display = "block";
+          licensePlateField.style.display = "block";
+          licensePlateInput.setAttribute("required", "required"); // Face câmpul obligatoriu
+      } else {
+          cargo_type.style.display = "none";
+          licensePlateField.style.display = "none";
+          licensePlateInput.removeAttribute("required"); // Face câmpul opțional
+      }
+    }
+    function showEditUserCargoType() {
+      var role = document.getElementById("edit_user_role").value;
+      var cargo_type = document.getElementById("edit_user_cargo_type");
+      var licensePlateField = document.getElementById("edit_user_license_plate_field");
+      var licensePlateInput = document.getElementById("edit_user_license_plate");
+
+      if (role == "driver") {
+          cargo_type.style.display = "block";
+          licensePlateField.style.display = "block";
+          licensePlateInput.setAttribute("required", "required"); // Face câmpul obligatoriu
+      } else {
+          cargo_type.style.display = "none";
+          licensePlateField.style.display = "none";
+          licensePlateInput.removeAttribute("required"); // Face câmpul opțional
+      }
+    }
+    </script>      
+</body>
+</html>

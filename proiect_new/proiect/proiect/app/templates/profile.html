@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<header class="header-general js-header-general h-20" style="transform: translate3d(0px, 0px, 0px); margin-bottom: -100px;">
+    <a href="/dashboard" title="Home" aria-label="Home" >
+        <img src="{{ url_for('static', filename='images/frightdispatch-black.svg') }}" alt="">
+    </a>
+  </header>  
+<body>
+    <div class="container h-85" style="padding: 3%">
+        <h1>{{user.firstname}} {{user.lastname}}</h1>
+        <form action="{{ '/user/' + user.id|string +'/update' }}" method="POST" autocomplete="off">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" readonly name="email" id="email" class="form-control" value="{{user.email}}">
+            </div>
+            <div class="form-group">
+                <label for="firstname">Nume:</label>
+                <input type="text" name="firstname" id="firstname" class="form-control" required value="{{user.firstname}}">
+            </div>
+            <div class="form-group">
+                <label for="lastname">Nume:</label>
+                <input type="text" name="lastname" id="lastname" class="form-control" required value="{{user.lastname}}">
+            </div>
+            <div class="form-group">
+                <label for="role">Rol</label>
+                {% if user.role == 'admin' %}
+                <select class="form-control" name="role" id="role" required onchange="showCargoType()">
+                    <option value="" disabled hidden>Selectati rolul</option>
+                    <option value="admin" selected>Administrator</option>
+                    <option value="dispatcher">Dispecer</option>
+                    <option value="driver">Șofer</option>                               
+                </select>
+                {% elif user.role == 'dispatcher' %}
+                <select class="form-control" name="role" id="role" required onchange="showCargoType()">
+                    <option value="" disabled hidden>Selectati rolul</option>
+                    <option value="admin">Administrator</option>
+                    <option value="dispatcher" selected>Dispecer</option>
+                    <option value="driver">Șofer</option>                               
+                </select>
+                {% elif user.role == 'driver' %}
+                <select class="form-control" name="role" id="role" required onchange="showCargoType()">
+                    <option value="" selected disabled hidden>Selectati rolul</option>
+                    <option value="admin">Administrator</option>
+                    <option value="dispatcher">Dispecer</option>
+                    <option value="driver" selected>Șofer</option>                               
+                </select>
+                {% else %}
+                <select class="form-control" name="role" id="role" required onchange="showCargoType()">
+                    <option value="" selected disabled hidden>Selectati rolul</option>
+                    <option value="admin">Administrator</option>
+                    <option value="dispatcher">Dispecer</option>
+                    <option value="driver">Șofer</option>                               
+                </select>             
+                {% endif %}                                
+            </div>     
+     
+            {% if user.role == 'driver' %}
+            <div class="form-group" id="cargo_type" style="display:block;">
+            {% else %}
+            <div class="form-group" id="cargo_type" style="display:none;">
+            {% endif %}
+                <label for="cargo_type">Tip Camion</label>
+                {% if user.truck_type == 'Remorcă Frigorific'%}
+                <select class="form-control" name="cargo_type" id="cargo_type">
+                  <option value="" disabled hidden>Selectati tip camion</option>
+                  <option selected>Remorcă Frigorifică</option>
+                  <option>Remorcă Uscată</option>
+                  <option>Remorcă Cisternă</option>
+                </select>
+                {% elif user.truck_type == 'Remorcă Uscată' %}
+                <select class="form-control" name="cargo_type" id="cargo_type">
+                  <option>Remorcă Frigorifică</option>
+                  <option selected>Remorcă Uscată</option>
+                  <option>Remorcă Cisternă</option>
+                </select>
+                {% elif user.truck_type == 'Remorcă Cisternă' %}
+                <select class="form-control" name="cargo_type" id="cargo_type">
+                  <option>Remorcă Frigorifică</option>
+                  <option>Remorcă Uscată</option>
+                  <option selected>Remorcă Cisternă</option>
+                </select>
+                {% else %}
+                <select class="form-control" name="cargo_type" id="cargo_type">
+                  <option value="" selected hidden>Selectati tip camion</option>
+                  <option>Remorcă Frigorifică</option>
+                  <option>Remorcă Uscată</option>
+                  <option>Remorcă Cisternă</option>    
+                </select>             
+                {% endif %}
+            </div>
+            {% if user.role == 'driver' %}
+            <div class="form-group" id="license_plate_field">
+                <label for="license_plate">Nr Înmatriculare</label>
+                <input type="text" required class="form-control" name="license_plate" id="license_plate" value="{{user.license_plate}}" >
+            </div>                            
+            {% else %}
+            <div class="form-group" id="license_plate_field" style="display: none;">
+                <label for="license_plate">Nr Înmatriculare</label>
+                <input type="text" class="form-control" name="license_plate" id="license_plate">
+            </div>                            
+            {% endif %}    
+            <div class="form-group">
+                <label for="old_password">Parola Veche:</label>
+                <input type="password" name="old_password" id="old_password" class="form-control" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label for="new_password">Parola Nouă:</label>
+                <input type="password" name="new_password" id="new_password" class="form-control">
+            </div>  
+            <button type="submit" class="btn btn-primary">Modifica Datele</button>
+        </form>
+        {% if fail_message %}
+        <p class="text-black-50 mb-4 text-center"><span class="text-danger">{{ fail_message }}</span></p>
+        {% endif %}
+        {% if success_message %}
+        <p class="text-black-50 mb-4 text-center"><span class="text-green">{{ success_message }}</span></p>
+        {% endif %}
+    </div>
+    
+    <footer class="footer h-5">
+        <div class="container">
+            <span class="text-center">&copy; 2024 ALEXFREIGHTDISPATCH</span>
+        </div>
+    </footer>    
+    
+</body>
+</html>

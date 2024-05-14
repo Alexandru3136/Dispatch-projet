@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Înregistrare</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+    <section class="vh-100 gradient-custom">
+        <header class="header-general js-header-general h-20" style="transform: translate3d(0px, 0px, 0px);">
+            <a href="/" title="Home" aria-label="Home" >
+                <img src="{{ url_for('static', filename='images/frightdispatch.svg') }}" alt="">
+            </a>
+        </header>           
+        <div class="container py-2 h-85">
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-4">
+                        <h2 class="text-center">Înregistrare</h2>
+                        <form action="{{ url_for('register') }}" method="post" autocomplete="off">
+                            <div class="form-group">
+                                <label for="firstname">Nume</label>
+                                {% if form %}
+                                <input type="text" class="form-control" name="firstname" id="firstname" required value="{{form['firstname']}}">
+                                {% else %}
+                                <input type="text" class="form-control" name="firstname" id="firstname" required>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname">Prenume</label>
+                                {% if form %}
+                                <input type="text" class="form-control" name="lastname" id="lastname" required value="{{form['lastname']}}">
+                                {% else %}
+                                <input type="text" class="form-control" name="lastname" id="lastname" required>
+                                {% endif %}
+
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Adresa de email</label>
+                                {% if form %}
+                                <input type="email" class="form-control" name="email" id="email" required value="{{form['email']}}">
+                                {% else %}
+                                <input type="email" class="form-control" name="email" id="email" required>
+                                {% endif %}
+
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Parolă</label>
+
+                                {% if form %}
+                                <input type="password" class="form-control" name="password" id="password" required value="{{form['password']}}">
+                                {% else %}
+                                <input type="password" class="form-control" name="password" id="password" required autocomplete="new-password">
+                                {% endif %}
+
+                            </div>
+                            <div class="form-group">
+                                <label for="role">Rol</label>
+                                {% if role == 'admin'%}
+                                <select class="form-control" name="role" id="role" required onchange="showCargoType()">
+                                    <option value="" disabled hidden>Selectati rolul</option>
+                                    <option value="admin" selected>Administrator</option>
+                                    <option value="dispatcher">Dispecer</option>
+                                    <option value="driver">Șofer</option>                               
+                                </select>
+                                {% elif role == 'dispatcher' %}
+                                <select class="form-control" name="role" id="role" required onchange="showCargoType()">
+                                    <option value="" disabled hidden>Selectati rolul</option>
+                                    <option value="admin">Administrator</option>
+                                    <option value="dispatcher" selected>Dispecer</option>
+                                    <option value="driver">Șofer</option>                               
+                                </select>
+                                {% elif role == 'driver' %}
+                                <select class="form-control" name="role" id="role" required onchange="showCargoType()">
+                                    <option value="" selected disabled hidden>Selectati rolul</option>
+                                    <option value="admin">Administrator</option>
+                                    <option value="dispatcher">Dispecer</option>
+                                    <option value="driver" selected>Șofer</option>                               
+                                </select>
+                                {% else %}
+                                <select class="form-control" name="role" id="role" required onchange="showCargoType()">
+                                    <option value="" selected disabled hidden>Selectati rolul</option>
+                                    <option value="admin">Administrator</option>
+                                    <option value="dispatcher">Dispecer</option>
+                                    <option value="driver">Șofer</option>                               
+                                </select>             
+                                {% endif %}                                
+                            </div>
+                            <!-- Inregistrarea daca e sofer -->
+                            {% if role == 'driver' %}
+                            <div class="form-group" id="cargo_type" style="display:block;">
+                            {% else %}
+                            <div class="form-group" id="cargo_type" style="display:none;">
+                            {% endif %}
+                                <label for="cargo_type">Tip Camion</label>
+                                {% if truck_type == 'Remorcă Frigorific'%}
+                                <select class="form-control" name="cargo_type" id="cargo_type">
+                                  <option value="" disabled hidden>Selectati tip camion</option>
+                                  <option selected>Remorcă Frigorifică</option>
+                                  <option>Remorcă Uscată</option>
+                                  <option>Remorcă Cisternă</option>
+                                </select>
+                                {% elif truck_type == 'Remorcă Uscată' %}
+                                <select class="form-control" name="cargo_type" id="cargo_type">
+                                  <option>Remorcă Frigorifică</option>
+                                  <option selected>Remorcă Uscată</option>
+                                  <option>Remorcă Cisternă</option>
+                                </select>
+                                {% elif truck_type == 'Remorcă Cisternă' %}
+                                <select class="form-control" name="cargo_type" id="cargo_type">
+                                  <option>Remorcă Frigorifică</option>
+                                  <option>Remorcă Uscată</option>
+                                  <option selected>Remorcă Cisternă</option>
+                                </select>
+                                {% else %}
+                                <select class="form-control" name="cargo_type" id="cargo_type">
+                                  <option value="" selected hidden>Selectati tip camion</option>
+                                  <option>Remorcă Frigorifică</option>
+                                  <option>Remorcă Uscată</option>
+                                  <option>Remorcă Cisternă</option>    
+                                </select>             
+                                {% endif %}
+                            </div>
+                            {% if role == 'driver' %}
+                            <div class="form-group" id="license_plate_field" style="display:block;">
+                                <label for="license_plate">Nr Înmatriculare</label>
+                                <input type="text" required class="form-control" name="license_plate" id="license_plate" value="{{license_plate}}" >
+                            </div>                            
+                            {% else %}
+                            <div class="form-group" id="license_plate_field" style="display:none;">
+                                <label for="license_plate">Nr Înmatriculare</label>
+                                <input type="text" class="form-control" name="license_plate" id="license_plate">
+                            </div>                            
+                            {% endif %}                                
+       
+                            <button type="submit" class="btn btn-primary btn-block">Înregistrare</button>
+                        </form>
+                        <p class="text-center text-black mt-3">Ai deja un cont? <a href="{{ url_for('login') }}" class="text-black-50 fw-bold">Autentificare</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="footer h-5">
+            <div class="container">
+                <span class="text-center">&copy; 2024 ALEXFREIGHTDISPATCH</span>
+            </div>
+        </footer>           
+    </section>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+    function showCargoType() {
+        var role = document.getElementById("role").value;
+        var cargo_type = document.getElementById("cargo_type");
+        var licensePlateField = document.getElementById("license_plate_field");
+        var licensePlateInput = document.getElementById("license_plate");
+
+        if (role == "driver") {
+            cargo_type.style.display = "block";
+            licensePlateField.style.display = "block";
+            licensePlateInput.setAttribute("required", "required"); // Face câmpul obligatoriu
+        } else {
+            cargo_type.style.display = "none";
+            licensePlateField.style.display = "none";
+            licensePlateInput.removeAttribute("required"); // Face câmpul opțional
+        }
+    }
+    </script>    
+</body>
+</html>
